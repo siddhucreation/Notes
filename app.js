@@ -501,4 +501,4 @@ if(role){
   showManager();
 }else{
   showLogin();
-}
+                                      }
