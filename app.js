@@ -1,6 +1,7 @@
 /* =========================================================
    DOCVAULT
-   GitHub-based document file manager
+   GitHub Folder = Website Folder
+   Google Docs Viewer = PDF Preview
    ========================================================= */
 
 
@@ -16,7 +17,6 @@ const BRANCH = "main";
 
 /* =========================================================
    LOGIN ACCOUNTS
-   Change passwords here whenever you want.
    ========================================================= */
 
 const ACCOUNTS = {
@@ -38,29 +38,32 @@ const ACCOUNTS = {
    APP VARIABLES
    ========================================================= */
 
-let role = sessionStorage.getItem("docvault_role") || "";
+let role =
+    sessionStorage.getItem("docvault_role") || "";
 
-let currentPath = GITHUB_PATH;
+let currentPath =
+    GITHUB_PATH;
 
 let currentItems = [];
 
 
 /* =========================================================
-   GET APP ELEMENT
+   APP ELEMENT
    ========================================================= */
 
-const app = document.getElementById("app");
+const app =
+    document.getElementById("app");
 
 
 /* =========================================================
-   SAFETY FUNCTION
+   SAFETY
    ========================================================= */
 
 function escapeHTML(value) {
 
     return String(value).replace(/[&<>"']/g, function (character) {
 
-        const characters = {
+        const map = {
 
             "&": "&amp;",
             "<": "&lt;",
@@ -70,7 +73,7 @@ function escapeHTML(value) {
 
         };
 
-        return characters[character];
+        return map[character];
 
     });
 
@@ -167,10 +170,15 @@ function showLogin() {
 function login() {
 
     const userId =
-        document.getElementById("uid").value.trim();
+        document
+            .getElementById("uid")
+            .value
+            .trim();
 
     const password =
-        document.getElementById("pwd").value;
+        document
+            .getElementById("pwd")
+            .value;
 
 
     if (
@@ -178,15 +186,10 @@ function login() {
         ACCOUNTS[userId].password !== password
     ) {
 
-        const error =
-            document.getElementById("error");
-
-        if (error) {
-
-            error.textContent =
-                "Invalid User ID or Password.";
-
-        }
+        document
+            .getElementById("error")
+            .textContent =
+            "Invalid User ID or Password.";
 
         return;
 
@@ -315,11 +318,11 @@ function showManager() {
 
                         ?
 
-                        "Admin portal — manage folders and files directly from GitHub."
+                        "Admin portal — manage your files and folders directly from GitHub."
 
                         :
 
-                        "Read-only access — view and preview available documents."
+                        "Read-only access — preview and download available documents."
 
                     }
 
@@ -510,7 +513,7 @@ async function loadFolder() {
         if (!Array.isArray(data)) {
 
             throw new Error(
-                "This GitHub path is not a folder."
+                "This path is not a folder."
             );
 
         }
@@ -532,7 +535,7 @@ async function loadFolder() {
     catch (error) {
 
         console.error(
-            "DocVault GitHub Error:",
+            "GitHub Error:",
             error
         );
 
@@ -570,7 +573,7 @@ async function loadFolder() {
 
 
 /* =========================================================
-   DRAW FILES AND FOLDERS
+   DISPLAY FILES
    ========================================================= */
 
 function drawFiles(items) {
@@ -592,7 +595,9 @@ function drawFiles(items) {
 
     const search =
         searchElement
-            ? searchElement.value.toLowerCase().trim()
+            ? searchElement.value
+                .toLowerCase()
+                .trim()
             : "";
 
 
@@ -660,7 +665,8 @@ function drawFiles(items) {
             document.createElement("article");
 
 
-        card.className = "item";
+        card.className =
+            "item";
 
 
         const isFolder =
@@ -886,7 +892,7 @@ function openFolder(path) {
 
 
 /* =========================================================
-   PREVIEW FILE
+   PREVIEW
    ========================================================= */
 
 function previewFile(path) {
@@ -902,6 +908,8 @@ function previewFile(path) {
             .toLowerCase();
 
 
+    /* PDF */
+
     if (extension === "pdf") {
 
         showPDFViewer(
@@ -914,9 +922,7 @@ function previewFile(path) {
     }
 
 
-    /*
-      Images can also be previewed.
-    */
+    /* IMAGES */
 
     if (
         extension === "jpg" ||
@@ -935,9 +941,7 @@ function previewFile(path) {
     }
 
 
-    /*
-      Other files
-    */
+    /* OTHER FILES */
 
     window.open(
         getRawFileURL(path),
@@ -949,7 +953,7 @@ function previewFile(path) {
 
 
 /* =========================================================
-   PDF VIEWER
+   GOOGLE DOCS PDF VIEWER
    ========================================================= */
 
 function showPDFViewer(
@@ -959,6 +963,17 @@ function showPDFViewer(
 
     const pdfURL =
         getRawFileURL(path);
+
+
+    /*
+      Google Docs Viewer URL
+
+      The GitHub PDF must be publicly accessible.
+    */
+
+    const googleViewerURL =
+        "https://docs.google.com/gview?embedded=1&url=" +
+        encodeURIComponent(pdfURL);
 
 
     app.innerHTML = `
@@ -1006,13 +1021,17 @@ function showPDFViewer(
 
             <main
                 class="main"
-                style="max-width:1300px"
+                style="
+                    max-width:1300px;
+                "
             >
 
 
                 <div
                     class="heading"
-                    style="align-items:center"
+                    style="
+                        align-items:center;
+                    "
                 >
 
                     <div>
@@ -1065,15 +1084,20 @@ function showPDFViewer(
                 >
 
                     <iframe
-                        src="${pdfURL}"
-                        title="PDF Preview"
+
+                        src="${googleViewerURL}"
+
+                        title="Google PDF Viewer"
+
                         style="
                             width:100%;
                             height:100%;
                             border:0;
                             display:block;
-                            background:#525659;
                         "
+
+                        allowfullscreen
+
                     ></iframe>
 
                 </div>
@@ -1108,14 +1132,13 @@ function showImageViewer(
 
             <header class="top">
 
-
                 <div
                     class="logo"
                     style="font-size:20px"
                 >
 
                     <span
-                        class="logoIcon"
+                    class="logoIcon"
                         style="
                             width:35px;
                             height:35px;
@@ -1139,7 +1162,6 @@ function showImageViewer(
                     </button>
 
                 </div>
-
 
             </header>
 
@@ -1224,7 +1246,7 @@ function showImageViewer(
 
 
 /* =========================================================
-   DOWNLOAD FILE
+   DOWNLOAD
    ========================================================= */
 
 function downloadFile(path) {
@@ -1237,9 +1259,13 @@ function downloadFile(path) {
         document.createElement("a");
 
 
-    link.href = url;
+    link.href =
+        url;
 
-    link.target = "_blank";
+
+    link.target =
+        "_blank";
+
 
     link.rel =
         "noopener noreferrer";
@@ -1444,4 +1470,5 @@ else {
 
     showLogin();
 
-     }
+}
+                        
