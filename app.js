@@ -1,8 +1,11 @@
 /*
-  DocVault — GitHub folders = website folders
+  DOCVAULT
+  GitHub folders = Website folders
+  Built-in PDF preview
 
   CHANGE THESE:
 */
+
 const GITHUB_OWNER="siddhucreation";
 const GITHUB_REPO="Notes";
 const GITHUB_PATH="documents";
@@ -10,7 +13,7 @@ const BRANCH="main";
 
 
 /* =========================
-   LOGIN
+   LOGIN ACCOUNTS
 ========================= */
 
 const ACCOUNTS = {
@@ -25,19 +28,29 @@ const ACCOUNTS = {
     }
 };
 
+
 let role = sessionStorage.getItem("docvault_role") || "";
+
 let currentPath = GITHUB_PATH;
+
 let currentItems = [];
+
+
+/* =========================
+   APP
+========================= */
 
 const app = document.getElementById("app");
 
 
 /* =========================
-   ESCAPE HTML
+   HTML ESCAPE
 ========================= */
 
 function escapeHTML(text) {
+
     return String(text).replace(/[&<>"']/g, function (char) {
+
         return {
             "&": "&amp;",
             "<": "&lt;",
@@ -45,7 +58,9 @@ function escapeHTML(text) {
             '"': "&quot;",
             "'": "&#039;"
         }[char];
+
     });
+
 }
 
 
@@ -56,37 +71,57 @@ function escapeHTML(text) {
 function showLogin() {
 
     app.innerHTML = `
+
         <main class="login">
 
             <section class="card">
 
                 <div class="logo">
-                    <span class="logoIcon">▣</span>
+
+                    <span class="logoIcon">
+                        ▣
+                    </span>
+
                     DocVault
+
                 </div>
 
                 <p class="muted">
                     Simple document access portal
                 </p>
 
+
                 <div class="field">
-                    <label>User ID</label>
+
+                    <label>
+                        User ID
+                    </label>
+
                     <input
                         id="uid"
                         placeholder="Enter User ID"
                         autocomplete="username"
                     >
+
                 </div>
 
+
                 <div class="field">
-                    <label>Password</label>
+
+                    <label>
+                        Password
+                    </label>
+
                     <input
                         id="pwd"
                         type="password"
                         placeholder="Enter Password"
                         autocomplete="current-password"
+                        onkeydown="if(event.key==='Enter') login()"
                     >
+
                 </div>
+
 
                 <button
                     class="primary loginBtn"
@@ -95,12 +130,18 @@ function showLogin() {
                     Sign in
                 </button>
 
-                <div id="error" class="error"></div>
+
+                <div
+                    id="error"
+                    class="error"
+                ></div>
 
             </section>
 
         </main>
+
     `;
+
 }
 
 
@@ -110,30 +151,46 @@ function showLogin() {
 
 function login() {
 
-    const id = document.getElementById("uid").value.trim();
-    const password = document.getElementById("pwd").value;
+    const id =
+        document.getElementById("uid")
+        .value
+        .trim();
+
+    const password =
+        document.getElementById("pwd")
+        .value;
+
 
     if (
         !ACCOUNTS[id] ||
         ACCOUNTS[id].password !== password
     ) {
 
-        document.getElementById("error").textContent =
+        document.getElementById("error")
+            .textContent =
             "Invalid User ID or Password.";
 
         return;
+
     }
 
-    role = ACCOUNTS[id].role;
+
+    role =
+        ACCOUNTS[id].role;
+
 
     sessionStorage.setItem(
         "docvault_role",
         role
     );
 
-    currentPath = GITHUB_PATH;
+
+    currentPath =
+        GITHUB_PATH;
+
 
     showManager();
+
 }
 
 
@@ -143,14 +200,17 @@ function login() {
 
 function logout() {
 
-    sessionStorage.removeItem("docvault_role");
+    sessionStorage.removeItem(
+        "docvault_role"
+    );
 
     location.reload();
+
 }
 
 
 /* =========================
-   MAIN PAGE
+   MAIN FILE MANAGER
 ========================= */
 
 function showManager() {
@@ -161,7 +221,11 @@ function showManager() {
 
             <header class="top">
 
-                <div class="logo" style="font-size:20px">
+
+                <div
+                    class="logo"
+                    style="font-size:20px"
+                >
 
                     <span
                         class="logoIcon"
@@ -174,11 +238,19 @@ function showManager() {
 
                 </div>
 
+
                 <div class="right">
 
                     <span class="badge">
-                        ${role === "admin" ? "Admin" : "Read only"}
+
+                        ${
+                            role === "admin"
+                            ? "Admin"
+                            : "Read only"
+                        }
+
                     </span>
+
 
                     <button
                         class="logout"
@@ -189,19 +261,24 @@ function showManager() {
 
                 </div>
 
+
             </header>
 
 
             <main class="main">
 
+
                 <div class="heading">
 
                     <div>
 
-                        <h1>Documents</h1>
+                        <h1>
+                            Documents
+                        </h1>
 
                         <div class="muted">
-                            Folders and files are loaded directly from GitHub.
+                            Browse your documents
+                            and folders.
                         </div>
 
                     </div>
@@ -213,10 +290,15 @@ function showManager() {
 
                     ${
                         role === "admin"
+
                         ?
+
                         "Admin portal. Manage folders and files directly in GitHub."
+
                         :
-                        "Read-only access. You can open folders and view/download documents."
+
+                        "Read-only access. You can open folders, preview PDFs and download documents."
+
                     }
 
                 </div>
@@ -251,37 +333,58 @@ function showManager() {
 
                 </div>
 
+
             </main>
 
         </div>
+
     `;
 
+
     loadFolder();
+
 }
 
 
 /* =========================
-   CREATE GITHUB API URL
+   GITHUB API URL
 ========================= */
 
 function getGitHubAPIURL(path) {
 
-    let encodedPath = path
+    const encodedPath = path
         .split("/")
         .filter(Boolean)
-        .map(part => encodeURIComponent(part))
+        .map(
+            part => encodeURIComponent(part)
+        )
         .join("/");
+
 
     return (
         "https://api.github.com/repos/" +
-        encodeURIComponent(GITHUB_OWNER) +
+
+        encodeURIComponent(
+            GITHUB_OWNER
+        ) +
+
         "/" +
-        encodeURIComponent(GITHUB_REPO) +
+
+        encodeURIComponent(
+            GITHUB_REPO
+        ) +
+
         "/contents/" +
+
         encodedPath +
+
         "?ref=" +
-        encodeURIComponent(BRANCH)
+
+        encodeURIComponent(
+            BRANCH
+        )
     );
+
 }
 
 
@@ -291,55 +394,77 @@ function getGitHubAPIURL(path) {
 
 async function loadFolder() {
 
-    const grid = document.getElementById("grid");
+    const grid =
+        document.getElementById("grid");
+
 
     drawBreadcrumb();
 
+
     if (
-        GITHUB_OWNER === "YOUR_GITHUB_USERNAME" ||
-        GITHUB_REPO === "YOUR_REPOSITORY"
+        GITHUB_OWNER ===
+        "YOUR_GITHUB_USERNAME" ||
+
+        GITHUB_REPO ===
+        "YOUR_REPOSITORY"
     ) {
 
         grid.innerHTML = `
+
             <div class="empty">
-                Please set your GitHub username
-                and repository name in app.js.
+
+                Please configure
+                GitHub settings in
+                <b>app.js</b>.
+
             </div>
+
         `;
 
         return;
+
     }
 
 
     grid.innerHTML = `
+
         <div class="empty">
+
             Loading GitHub files...
+
         </div>
+
     `;
 
 
     try {
 
-        const response = await fetch(
-            getGitHubAPIURL(currentPath),
-            {
-                headers: {
-                    "Accept": "application/vnd.github+json"
+        const response =
+            await fetch(
+                getGitHubAPIURL(
+                    currentPath
+                ),
+                {
+                    headers: {
+                        "Accept":
+                        "application/vnd.github+json"
+                    }
                 }
-            }
-        );
+            );
 
 
         if (!response.ok) {
 
             throw new Error(
-                "GitHub API error: " + response.status
+                "GitHub API error: " +
+                response.status
             );
 
         }
 
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
 
         if (!Array.isArray(data)) {
@@ -351,17 +476,22 @@ async function loadFolder() {
         }
 
 
-        currentItems = data;
+        currentItems =
+            data;
+
 
         drawFiles(data);
 
+
         drawBreadcrumb();
+
 
     }
 
     catch (error) {
 
         grid.innerHTML = `
+
             <div class="empty">
 
                 Could not load this folder.
@@ -369,7 +499,9 @@ async function loadFolder() {
                 <br><br>
 
                 <small>
-                    ${escapeHTML(error.message)}
+                    ${escapeHTML(
+                        error.message
+                    )}
                 </small>
 
                 <br><br>
@@ -382,9 +514,11 @@ async function loadFolder() {
                 </button>
 
             </div>
+
         `;
 
     }
+
 }
 
 
@@ -394,32 +528,53 @@ async function loadFolder() {
 
 function drawFiles(items) {
 
-    const grid = document.getElementById("grid");
+    const grid =
+        document.getElementById("grid");
+
 
     const searchInput =
         document.getElementById("search");
 
+
     const search =
         searchInput
         ?
-        searchInput.value.toLowerCase().trim()
+        searchInput.value
+            .toLowerCase()
+            .trim()
         :
         "";
 
 
-    const filtered = items
+    const filtered =
+        items
+
         .filter(item =>
-            item.name.toLowerCase().includes(search)
+            item.name
+                .toLowerCase()
+                .includes(search)
         )
+
         .sort((a, b) => {
 
-            if (a.type === "dir" && b.type !== "dir")
+            if (
+                a.type === "dir" &&
+                b.type !== "dir"
+            )
                 return -1;
 
-            if (a.type !== "dir" && b.type === "dir")
+
+            if (
+                a.type !== "dir" &&
+                b.type === "dir"
+            )
                 return 1;
 
-            return a.name.localeCompare(b.name);
+
+            return a.name
+                .localeCompare(
+                    b.name
+                );
 
         });
 
@@ -427,12 +582,17 @@ function drawFiles(items) {
     if (filtered.length === 0) {
 
         grid.innerHTML = `
+
             <div class="empty">
+
                 No files or folders found.
+
             </div>
+
         `;
 
         return;
+
     }
 
 
@@ -442,7 +602,10 @@ function drawFiles(items) {
     filtered.forEach(item => {
 
         const card =
-            document.createElement("article");
+            document.createElement(
+                "article"
+            );
+
 
         card.className = "item";
 
@@ -456,18 +619,38 @@ function drawFiles(items) {
             <div>
 
                 <div class="icon">
-                    ${isFolder ? "📁" : "📄"}
+
+                    ${
+                        isFolder
+                        ? "📁"
+                        : "📄"
+                    }
+
                 </div>
+
 
                 <div
                     class="name"
-                    title="${escapeHTML(item.name)}"
+                    title="${escapeHTML(
+                        item.name
+                    )}"
                 >
-                    ${escapeHTML(item.name)}
+
+                    ${escapeHTML(
+                        item.name
+                    )}
+
                 </div>
 
+
                 <div class="meta">
-                    ${isFolder ? "Folder" : "Document"}
+
+                    ${
+                        isFolder
+                        ? "Folder"
+                        : "PDF / Document"
+                    }
+
                 </div>
 
             </div>
@@ -475,94 +658,300 @@ function drawFiles(items) {
 
             <div class="actions">
 
-                <button class="mini">
+                ${
+                    isFolder
 
-                    ${
-                        isFolder
-                        ?
-                        "Open"
-                        :
-                        "View / Download"
-                    }
+                    ?
 
-                </button>
+                    `
+                    <button
+                        class="mini"
+                        onclick="openFolder('${escapeHTML(item.path)}')"
+                    >
+                        Open
+                    </button>
+                    `
+
+                    :
+
+                    `
+                    <button
+                        class="mini"
+                        onclick="previewFile('${escapeHTML(item.path)}')"
+                    >
+                        Preview
+                    </button>
+
+                    <button
+                        class="mini"
+                        onclick="downloadFile('${escapeHTML(item.path)}')"
+                    >
+                        Download
+                    </button>
+                    `
+
+                }
 
             </div>
 
         `;
 
 
-        const button =
-            card.querySelector("button");
-
-
-        if (isFolder) {
-
-            button.onclick = function () {
-
-                /*
-                  THIS IS THE IMPORTANT FIX.
-
-                  Use the exact path returned
-                  by GitHub.
-                */
-
-                currentPath = item.path;
-
-                document.getElementById("search").value = "";
-
-                loadFolder();
-
-            };
-
-        }
-
-        else {
-
-            button.onclick = function () {
-
-                openFile(item);
-
-            };
-
-        }
-
-
         grid.appendChild(card);
 
     });
+
 }
 
 
 /* =========================
-   OPEN FILE
+   OPEN FOLDER
 ========================= */
 
-function openFile(item) {
+function openFolder(path) {
 
-    let url =
-        item.download_url;
+    currentPath =
+        path;
 
 
-    if (!url) {
+    document.getElementById(
+        "search"
+    ).value = "";
 
-        url =
-            "https://github.com/" +
-            GITHUB_OWNER +
-            "/" +
-            GITHUB_REPO +
-            "/blob/" +
-            BRANCH +
-            "/" +
-            item.path;
+
+    loadFolder();
+
+}
+
+
+/* =========================
+   GET RAW GITHUB FILE URL
+========================= */
+
+function getRawFileURL(path) {
+
+    return (
+        "https://raw.githubusercontent.com/" +
+
+        encodeURIComponent(
+            GITHUB_OWNER
+        ) +
+
+        "/" +
+
+        encodeURIComponent(
+            GITHUB_REPO
+        ) +
+
+        "/" +
+
+        encodeURIComponent(
+            BRANCH
+        ) +
+
+        "/" +
+
+        path
+            .split("/")
+            .map(
+                part =>
+                encodeURIComponent(part)
+            )
+            .join("/")
+    );
+
+}
+
+
+/* =========================
+   PDF PREVIEW
+========================= */
+
+function previewFile(path) {
+
+    const fileName =
+        path
+            .split("/")
+            .pop();
+
+
+    const lower =
+        fileName
+            .toLowerCase();
+
+
+    if (!lower.endsWith(".pdf")) {
+
+        alert(
+            "Built-in preview is currently available for PDF files."
+        );
+
+        return;
 
     }
 
 
-    window.open(
-        url,
-        "_blank"
+    const pdfURL =
+        getRawFileURL(path);
+
+
+    app.innerHTML = `
+
+        <div>
+
+            <header class="top">
+
+                <div
+                    class="logo"
+                    style="font-size:20px"
+                >
+
+                    <span
+                        class="logoIcon"
+                        style="width:35px;height:35px"
+                    >
+                        ▣
+                    </span>
+
+                    DocVault
+
+                </div>
+
+
+                <div class="right">
+
+                    <button
+                        class="logout"
+                        onclick="showManager()"
+                    >
+                        ← Back
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <main
+                class="main"
+                style="max-width:1200px"
+            >
+
+                <div
+                    class="heading"
+                    style="align-items:center"
+                >
+
+                    <div>
+
+                        <h1>
+                            ${escapeHTML(
+                                fileName
+                            )}
+                        </h1>
+
+                        <div class="muted">
+                            PDF Preview
+                        </div>
+
+                    </div>
+
+
+                    <div class="tools">
+
+                        <button
+                            class="secondary"
+                            onclick="showManager()"
+                        >
+                            Back
+                        </button>
+
+
+                        <a
+                            href="${pdfURL}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            style="text-decoration:none"
+                        >
+
+                            <button class="action">
+                                Download
+                            </button>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    style="
+                        background:#fff;
+                        border:1px solid #e4e7ee;
+                        border-radius:16px;
+                        overflow:hidden;
+                        height:calc(100vh - 190px);
+                        min-height:500px;
+                    "
+                >
+
+                    <iframe
+                        src="${pdfURL}#toolbar=1&navpanes=0&view=FitH"
+                        title="PDF Preview"
+                        style="
+                            width:100%;
+                            height:100%;
+                            border:0;
+                        "
+                    ></iframe>
+
+                </div>
+
+            </main>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+function downloadFile(path) {
+
+    const url =
+        getRawFileURL(path);
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href = url;
+
+    link.target = "_blank";
+
+    link.rel =
+        "noopener noreferrer";
+
+
+    document.body.appendChild(
+        link
     );
+
+
+    link.click();
+
+
+    link.remove();
+
 }
 
 
@@ -572,7 +961,9 @@ function openFile(item) {
 
 function filterFiles() {
 
-    drawFiles(currentItems);
+    drawFiles(
+        currentItems
+    );
 
 }
 
@@ -584,7 +975,10 @@ function filterFiles() {
 function drawBreadcrumb() {
 
     const breadcrumb =
-        document.getElementById("breadcrumb");
+        document.getElementById(
+            "breadcrumb"
+        );
+
 
     if (!breadcrumb)
         return;
@@ -594,92 +988,124 @@ function drawBreadcrumb() {
 
 
     const home =
-        document.createElement("span");
-
-    home.textContent = "Home";
-
-    home.onclick = function () {
-
-        currentPath = GITHUB_PATH;
-
-        document.getElementById("search").value = "";
-
-        loadFolder();
-
-    };
+        document.createElement(
+            "span"
+        );
 
 
-    breadcrumb.appendChild(home);
+    home.textContent =
+        "Home";
 
 
-    if (!currentPath)
-        return;
-
-
-    const base =
-        GITHUB_PATH
-            .split("/")
-            .filter(Boolean);
-
-
-    const current =
-        currentPath
-            .split("/")
-            .filter(Boolean);
-
-
-    const remaining =
-        current.slice(base.length);
-
-
-    let builtPath =
-        GITHUB_PATH;
-
-
-    remaining.forEach(folder => {
-
-        const separator =
-            document.createElement("b");
-
-        separator.textContent = "/";
-
-        breadcrumb.appendChild(separator);
-
-
-        builtPath += "/" + folder;
-
-
-        const span =
-            document.createElement("span");
-
-        span.textContent = folder;
-
-
-        const pathForClick =
-            builtPath;
-
-
-        span.onclick = function () {
+    home.onclick =
+        function () {
 
             currentPath =
-                pathForClick;
+                GITHUB_PATH;
 
-            document.getElementById("search").value = "";
+
+            document.getElementById(
+                "search"
+            ).value = "";
+
 
             loadFolder();
 
         };
 
 
-        breadcrumb.appendChild(span);
+    breadcrumb.appendChild(
+        home
+    );
 
-    });
+
+    const baseParts =
+        GITHUB_PATH
+            .split("/")
+            .filter(Boolean);
+
+
+    const currentParts =
+        currentPath
+            .split("/")
+            .filter(Boolean);
+
+
+    const remaining =
+        currentParts.slice(
+            baseParts.length
+        );
+
+
+    let builtPath =
+        GITHUB_PATH;
+
+
+    remaining.forEach(
+        folder => {
+
+            const separator =
+                document.createElement(
+                    "b"
+                );
+
+
+            separator.textContent =
+                "/";
+
+
+            breadcrumb.appendChild(
+                separator
+            );
+
+
+            builtPath +=
+                "/" + folder;
+
+
+            const span =
+                document.createElement(
+                    "span"
+                );
+
+
+            span.textContent =
+                folder;
+
+
+            const selectedPath =
+                builtPath;
+
+
+            span.onclick =
+                function () {
+
+                    currentPath =
+                        selectedPath;
+
+
+                    document.getElementById(
+                        "search"
+                    ).value = "";
+
+
+                    loadFolder();
+
+                };
+
+
+            breadcrumb.appendChild(
+                span
+            );
+
+        }
+    );
 
 }
 
 
 /* =========================
-   START
+   START APP
 ========================= */
 
 if (role) {
