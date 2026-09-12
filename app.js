@@ -1,29 +1,12 @@
-/*
-=========================================================
- DOCVAULT
- GitHub Folder = Website Folder
-=========================================================
-
- GitHub:
- https://github.com/siddhucreation/Notes
-
- Structure:
-
- Notes
- └── documents
-      ├── Folder 1
-      │    └── file.pdf
-      ├── Folder 2
-      │    └── file.pdf
-      └── notes.pdf
-
-=========================================================
-*/
+/* =========================================================
+   DOCVAULT
+   GitHub-based document file manager
+   ========================================================= */
 
 
-/* ======================================================
-   GITHUB SETTINGS
-====================================================== */
+/* =========================================================
+   GITHUB CONFIGURATION
+   ========================================================= */
 
 const GITHUB_OWNER = "siddhucreation";
 const GITHUB_REPO = "Notes";
@@ -31,9 +14,10 @@ const GITHUB_PATH = "documents";
 const BRANCH = "main";
 
 
-/* ======================================================
-   LOGIN DETAILS
-====================================================== */
+/* =========================================================
+   LOGIN ACCOUNTS
+   Change passwords here whenever you want.
+   ========================================================= */
 
 const ACCOUNTS = {
 
@@ -50,53 +34,52 @@ const ACCOUNTS = {
 };
 
 
-/* ======================================================
+/* =========================================================
    APP VARIABLES
-====================================================== */
+   ========================================================= */
 
-let role =
-    sessionStorage.getItem("docvault_role") || "";
+let role = sessionStorage.getItem("docvault_role") || "";
 
-let currentPath =
-    GITHUB_PATH;
+let currentPath = GITHUB_PATH;
 
 let currentItems = [];
 
-const app =
-    document.getElementById("app");
+
+/* =========================================================
+   GET APP ELEMENT
+   ========================================================= */
+
+const app = document.getElementById("app");
 
 
-/* ======================================================
-   HTML ESCAPE
-====================================================== */
+/* =========================================================
+   SAFETY FUNCTION
+   ========================================================= */
 
-function escapeHTML(text) {
+function escapeHTML(value) {
 
-    return String(text).replace(
-        /[&<>"']/g,
+    return String(value).replace(/[&<>"']/g, function (character) {
 
-        function (character) {
+        const characters = {
 
-            return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
 
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#039;"
+        };
 
-            }[character];
+        return characters[character];
 
-        }
-
-    );
+    });
 
 }
 
 
-/* ======================================================
-   LOGIN SCREEN
-====================================================== */
+/* =========================================================
+   LOGIN PAGE
+   ========================================================= */
 
 function showLogin() {
 
@@ -149,11 +132,7 @@ function showLogin() {
                         type="password"
                         placeholder="Enter Password"
                         autocomplete="current-password"
-                        onkeydown="
-                            if(event.key === 'Enter'){
-                                login();
-                            }
-                        "
+                        onkeydown="if(event.key === 'Enter') login()"
                     >
 
                 </div>
@@ -163,9 +142,7 @@ function showLogin() {
                     class="primary loginBtn"
                     onclick="login()"
                 >
-
                     Sign In
-
                 </button>
 
 
@@ -183,33 +160,33 @@ function showLogin() {
 }
 
 
-/* ======================================================
+/* =========================================================
    LOGIN
-====================================================== */
+   ========================================================= */
 
 function login() {
 
-    const id =
-        document
-            .getElementById("uid")
-            .value
-            .trim();
+    const userId =
+        document.getElementById("uid").value.trim();
 
     const password =
-        document
-            .getElementById("pwd")
-            .value;
+        document.getElementById("pwd").value;
 
 
     if (
-        !ACCOUNTS[id] ||
-        ACCOUNTS[id].password !== password
+        !ACCOUNTS[userId] ||
+        ACCOUNTS[userId].password !== password
     ) {
 
-        document
-            .getElementById("error")
-            .textContent =
-            "Invalid User ID or Password.";
+        const error =
+            document.getElementById("error");
+
+        if (error) {
+
+            error.textContent =
+                "Invalid User ID or Password.";
+
+        }
 
         return;
 
@@ -217,7 +194,7 @@ function login() {
 
 
     role =
-        ACCOUNTS[id].role;
+        ACCOUNTS[userId].role;
 
 
     sessionStorage.setItem(
@@ -235,9 +212,9 @@ function login() {
 }
 
 
-/* ======================================================
+/* =========================================================
    LOGOUT
-====================================================== */
+   ========================================================= */
 
 function logout() {
 
@@ -245,14 +222,16 @@ function logout() {
         "docvault_role"
     );
 
+    role = "";
+
     location.reload();
 
 }
 
 
-/* ======================================================
+/* =========================================================
    MAIN FILE MANAGER
-====================================================== */
+   ========================================================= */
 
 function showManager() {
 
@@ -300,9 +279,7 @@ function showManager() {
                         class="logout"
                         onclick="logout()"
                     >
-
                         Sign Out
-
                     </button>
 
                 </div>
@@ -338,11 +315,11 @@ function showManager() {
 
                         ?
 
-                        "Admin portal — manage your files and folders directly from GitHub."
+                        "Admin portal — manage folders and files directly from GitHub."
 
                         :
 
-                        "Read-only access — view and download available documents."
+                        "Read-only access — view and preview available documents."
 
                     }
 
@@ -374,9 +351,7 @@ function showManager() {
                 >
 
                     <div class="empty">
-
                         Loading documents...
-
                     </div>
 
                 </div>
@@ -394,9 +369,9 @@ function showManager() {
 }
 
 
-/* ======================================================
+/* =========================================================
    GITHUB API URL
-====================================================== */
+   ========================================================= */
 
 function getGitHubAPIURL(path) {
 
@@ -404,10 +379,11 @@ function getGitHubAPIURL(path) {
         path
             .split("/")
             .filter(Boolean)
-            .map(
-                part =>
-                    encodeURIComponent(part)
-            )
+            .map(function (part) {
+
+                return encodeURIComponent(part);
+
+            })
             .join("/");
 
 
@@ -415,15 +391,11 @@ function getGitHubAPIURL(path) {
 
         "https://api.github.com/repos/" +
 
-        encodeURIComponent(
-            GITHUB_OWNER
-        ) +
+        encodeURIComponent(GITHUB_OWNER) +
 
         "/" +
 
-        encodeURIComponent(
-            GITHUB_REPO
-        ) +
+        encodeURIComponent(GITHUB_REPO) +
 
         "/contents/" +
 
@@ -431,18 +403,16 @@ function getGitHubAPIURL(path) {
 
         "?ref=" +
 
-        encodeURIComponent(
-            BRANCH
-        )
+        encodeURIComponent(BRANCH)
 
     );
 
 }
 
 
-/* ======================================================
-   RAW FILE URL
-====================================================== */
+/* =========================================================
+   RAW GITHUB FILE URL
+   ========================================================= */
 
 function getRawFileURL(path) {
 
@@ -450,10 +420,11 @@ function getRawFileURL(path) {
         path
             .split("/")
             .filter(Boolean)
-            .map(
-                part =>
-                    encodeURIComponent(part)
-            )
+            .map(function (part) {
+
+                return encodeURIComponent(part);
+
+            })
             .join("/");
 
 
@@ -480,9 +451,9 @@ function getRawFileURL(path) {
 }
 
 
-/* ======================================================
-   LOAD CURRENT FOLDER
-====================================================== */
+/* =========================================================
+   LOAD FOLDER
+   ========================================================= */
 
 async function loadFolder() {
 
@@ -491,11 +462,10 @@ async function loadFolder() {
 
 
     if (!grid) {
+
         return;
+
     }
-
-
-    drawBreadcrumb();
 
 
     grid.innerHTML = `
@@ -513,9 +483,7 @@ async function loadFolder() {
 
         const response =
             await fetch(
-                getGitHubAPIURL(
-                    currentPath
-                ),
+                getGitHubAPIURL(currentPath),
                 {
                     headers: {
                         "Accept":
@@ -528,7 +496,7 @@ async function loadFolder() {
         if (!response.ok) {
 
             throw new Error(
-                "GitHub API error: " +
+                "GitHub returned error " +
                 response.status
             );
 
@@ -542,7 +510,7 @@ async function loadFolder() {
         if (!Array.isArray(data)) {
 
             throw new Error(
-                "The selected path is not a folder."
+                "This GitHub path is not a folder."
             );
 
         }
@@ -564,7 +532,7 @@ async function loadFolder() {
     catch (error) {
 
         console.error(
-            "GitHub error:",
+            "DocVault GitHub Error:",
             error
         );
 
@@ -580,11 +548,7 @@ async function loadFolder() {
                 <br><br>
 
                 <small>
-
-                    ${escapeHTML(
-                        error.message
-                    )}
-
+                    ${escapeHTML(error.message)}
                 </small>
 
                 <br><br>
@@ -593,9 +557,7 @@ async function loadFolder() {
                     class="mini"
                     onclick="loadFolder()"
                 >
-
                     Retry
-
                 </button>
 
             </div>
@@ -607,14 +569,21 @@ async function loadFolder() {
 }
 
 
-/* ======================================================
-   DISPLAY FILES AND FOLDERS
-====================================================== */
+/* =========================================================
+   DRAW FILES AND FOLDERS
+   ========================================================= */
 
 function drawFiles(items) {
 
     const grid =
         document.getElementById("grid");
+
+
+    if (!grid) {
+
+        return;
+
+    }
 
 
     const searchElement =
@@ -623,55 +592,49 @@ function drawFiles(items) {
 
     const search =
         searchElement
-            ? searchElement.value
-                .toLowerCase()
-                .trim()
+            ? searchElement.value.toLowerCase().trim()
             : "";
 
 
     const filtered =
         items
-            .filter(
-                item =>
-                    item.name
-                        .toLowerCase()
-                        .includes(search)
-            )
-            .sort(
-                (a, b) => {
+            .filter(function (item) {
 
-                    if (
-                        a.type === "dir" &&
-                        b.type !== "dir"
-                    ) {
+                return item.name
+                    .toLowerCase()
+                    .includes(search);
 
-                        return -1;
+            })
+            .sort(function (a, b) {
 
-                    }
+                if (
+                    a.type === "dir" &&
+                    b.type !== "dir"
+                ) {
 
-
-                    if (
-                        a.type !== "dir" &&
-                        b.type === "dir"
-                    ) {
-
-                        return 1;
-
-                    }
-
-
-                    return a.name
-                        .localeCompare(
-                            b.name
-                        );
+                    return -1;
 
                 }
-            );
 
 
-    if (
-        filtered.length === 0
-    ) {
+                if (
+                    a.type !== "dir" &&
+                    b.type === "dir"
+                ) {
+
+                    return 1;
+
+                }
+
+
+                return a.name.localeCompare(
+                    b.name
+                );
+
+            });
+
+
+    if (filtered.length === 0) {
 
         grid.innerHTML = `
 
@@ -691,142 +654,119 @@ function drawFiles(items) {
     grid.innerHTML = "";
 
 
-    filtered.forEach(
-        item => {
+    filtered.forEach(function (item) {
 
-            const card =
-                document.createElement(
-                    "article"
-                );
+        const card =
+            document.createElement("article");
 
 
-            card.className =
-                "item";
+        card.className = "item";
 
 
-            const isFolder =
-                item.type === "dir";
+        const isFolder =
+            item.type === "dir";
 
 
-            const icon =
-                isFolder
-                    ? "📁"
-                    : getFileIcon(
-                        item.name
-                    );
+        const icon =
+            isFolder
+                ? "📁"
+                : getFileIcon(item.name);
 
 
-            card.innerHTML = `
-
-                <div>
-
-                    <div class="icon">
-
-                        ${icon}
-
-                    </div>
+        const safePath =
+            escapeHTML(item.path);
 
 
-                    <div
-                        class="name"
-                        title="${escapeHTML(
-                            item.name
-                        )}"
-                    >
+        card.innerHTML = `
 
-                        ${escapeHTML(
-                            item.name
-                        )}
+            <div>
 
-                    </div>
+                <div class="icon">
 
-
-                    <div class="meta">
-
-                        ${
-                            isFolder
-                                ? "Folder"
-                                : getFileType(
-                                    item.name
-                                )
-                        }
-
-                    </div>
+                    ${icon}
 
                 </div>
 
 
-                <div class="actions">
+                <div
+                    class="name"
+                    title="${escapeHTML(item.name)}"
+                >
+
+                    ${escapeHTML(item.name)}
+
+                </div>
+
+
+                <div class="meta">
 
                     ${
                         isFolder
-
-                        ?
-
-                        `
-
-                            <button
-                                class="mini"
-                                onclick="openFolder('${escapeHTML(
-                                    item.path
-                                )}')"
-                            >
-
-                                Open
-
-                            </button>
-
-                        `
-
-                        :
-
-                        `
-
-                            <button
-                                class="mini"
-                                onclick="previewFile('${escapeHTML(
-                                    item.path
-                                )}')"
-                            >
-
-                                Preview
-
-                            </button>
-
-
-                            <button
-                                class="mini"
-                                onclick="downloadFile('${escapeHTML(
-                                    item.path
-                                )}')"
-                            >
-
-                                Download
-
-                            </button>
-
-                        `
-
+                            ? "Folder"
+                            : getFileType(item.name)
                     }
 
                 </div>
 
-            `;
+            </div>
 
 
-            grid.appendChild(
-                card
-            );
+            <div class="actions">
 
-        }
-    );
+                ${
+                    isFolder
+
+                    ?
+
+                    `
+
+                    <button
+                        class="mini"
+                        onclick="openFolder('${safePath}')"
+                    >
+                        Open
+                    </button>
+
+                    `
+
+                    :
+
+                    `
+
+                    <button
+                        class="mini"
+                        onclick="previewFile('${safePath}')"
+                    >
+                        Preview
+                    </button>
+
+
+                    <button
+                        class="mini"
+                        onclick="downloadFile('${safePath}')"
+                    >
+                        Download
+                    </button>
+
+                    `
+
+                }
+
+            </div>
+
+        `;
+
+
+        grid.appendChild(card);
+
+    });
 
 }
 
 
-/* ======================================================
+/* =========================================================
    FILE ICON
-====================================================== */
+   ========================================================= */
 
 function getFileIcon(name) {
 
@@ -837,29 +777,41 @@ function getFileIcon(name) {
             .toLowerCase();
 
 
-    if (extension === "pdf")
+    if (extension === "pdf") {
+
         return "📕";
+
+    }
 
 
     if (
         extension === "doc" ||
         extension === "docx"
-    )
+    ) {
+
         return "📘";
+
+    }
 
 
     if (
         extension === "ppt" ||
         extension === "pptx"
-    )
+    ) {
+
         return "📙";
+
+    }
 
 
     if (
         extension === "xls" ||
         extension === "xlsx"
-    )
+    ) {
+
         return "📗";
+
+    }
 
 
     if (
@@ -867,15 +819,21 @@ function getFileIcon(name) {
         extension === "jpeg" ||
         extension === "png" ||
         extension === "webp"
-    )
+    ) {
+
         return "🖼️";
+
+    }
 
 
     if (
         extension === "zip" ||
         extension === "rar"
-    )
+    ) {
+
         return "🗜️";
+
+    }
 
 
     return "📄";
@@ -883,9 +841,9 @@ function getFileIcon(name) {
 }
 
 
-/* ======================================================
+/* =========================================================
    FILE TYPE
-====================================================== */
+   ========================================================= */
 
 function getFileType(name) {
 
@@ -901,9 +859,9 @@ function getFileType(name) {
 }
 
 
-/* ======================================================
+/* =========================================================
    OPEN FOLDER
-====================================================== */
+   ========================================================= */
 
 function openFolder(path) {
 
@@ -912,9 +870,7 @@ function openFolder(path) {
 
 
     const search =
-        document.getElementById(
-            "search"
-        );
+        document.getElementById("search");
 
 
     if (search) {
@@ -929,16 +885,14 @@ function openFolder(path) {
 }
 
 
-/* ======================================================
-   PDF PREVIEW
-====================================================== */
+/* =========================================================
+   PREVIEW FILE
+   ========================================================= */
 
 function previewFile(path) {
 
     const fileName =
-        path
-            .split("/")
-            .pop();
+        path.split("/").pop();
 
 
     const extension =
@@ -947,10 +901,6 @@ function previewFile(path) {
             .pop()
             .toLowerCase();
 
-
-    /*
-      PDF PREVIEW
-    */
 
     if (extension === "pdf") {
 
@@ -965,17 +915,32 @@ function previewFile(path) {
 
 
     /*
-      OTHER FILE TYPES
+      Images can also be previewed.
     */
 
-    const fileURL =
-        getRawFileURL(
-            path
+    if (
+        extension === "jpg" ||
+        extension === "jpeg" ||
+        extension === "png" ||
+        extension === "webp"
+    ) {
+
+        showImageViewer(
+            path,
+            fileName
         );
 
+        return;
+
+    }
+
+
+    /*
+      Other files
+    */
 
     window.open(
-        fileURL,
+        getRawFileURL(path),
         "_blank",
         "noopener,noreferrer"
     );
@@ -983,9 +948,9 @@ function previewFile(path) {
 }
 
 
-/* ======================================================
+/* =========================================================
    PDF VIEWER
-====================================================== */
+   ========================================================= */
 
 function showPDFViewer(
     path,
@@ -993,9 +958,7 @@ function showPDFViewer(
 ) {
 
     const pdfURL =
-        getRawFileURL(
-            path
-        );
+        getRawFileURL(path);
 
 
     app.innerHTML = `
@@ -1004,6 +967,7 @@ function showPDFViewer(
 
 
             <header class="top">
+
 
                 <div
                     class="logo"
@@ -1017,9 +981,7 @@ function showPDFViewer(
                             height:35px;
                         "
                     >
-
                         ▣
-
                     </span>
 
                     DocVault
@@ -1033,83 +995,57 @@ function showPDFViewer(
                         class="logout"
                         onclick="showManager()"
                     >
-
                         ← Back
-
                     </button>
 
                 </div>
+
 
             </header>
 
 
             <main
                 class="main"
-                style="
-                    max-width:1300px;
-                "
+                style="max-width:1300px"
             >
 
 
                 <div
                     class="heading"
-                    style="
-                        align-items:center;
-                    "
+                    style="align-items:center"
                 >
 
                     <div>
 
                         <h1>
-
-                            ${escapeHTML(
-                                fileName
-                            )}
-
+                            ${escapeHTML(fileName)}
                         </h1>
 
-
                         <div class="muted">
-
                             PDF Preview
-
                         </div>
 
                     </div>
 
 
-                    <div
-                        class="tools"
-                    >
+                    <div class="tools">
+
 
                         <button
                             class="secondary"
                             onclick="showManager()"
                         >
-
                             Back
-
                         </button>
 
 
-                        <a
-                            href="${pdfURL}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style="
-                                text-decoration:none;
-                            "
+                        <button
+                            class="primary"
+                            onclick="downloadFile('${escapeHTML(path)}')"
                         >
+                            Download
+                        </button>
 
-                            <button
-                                class="primary"
-                            >
-
-                                Download
-
-                            </button>
-
-                        </a>
 
                     </div>
 
@@ -1122,4 +1058,390 @@ function showPDFViewer(
                         height:calc(100vh - 190px);
                         min-height:500px;
                         background:#525659;
-                                  
+                        border-radius:16px;
+                        overflow:hidden;
+                        border:1px solid #ddd;
+                    "
+                >
+
+                    <iframe
+                        src="${pdfURL}"
+                        title="PDF Preview"
+                        style="
+                            width:100%;
+                            height:100%;
+                            border:0;
+                            display:block;
+                            background:#525659;
+                        "
+                    ></iframe>
+
+                </div>
+
+
+            </main>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   IMAGE VIEWER
+   ========================================================= */
+
+function showImageViewer(
+    path,
+    fileName
+) {
+
+    const imageURL =
+        getRawFileURL(path);
+
+
+    app.innerHTML = `
+
+        <div>
+
+
+            <header class="top">
+
+
+                <div
+                    class="logo"
+                    style="font-size:20px"
+                >
+
+                    <span
+                        class="logoIcon"
+                        style="
+                            width:35px;
+                            height:35px;
+                        "
+                    >
+                        ▣
+                    </span>
+
+                    DocVault
+
+                </div>
+
+
+                <div class="right">
+
+                    <button
+                        class="logout"
+                        onclick="showManager()"
+                    >
+                        ← Back
+                    </button>
+
+                </div>
+
+
+            </header>
+
+
+            <main class="main">
+
+
+                <div class="heading">
+
+                    <div>
+
+                        <h1>
+                            ${escapeHTML(fileName)}
+                        </h1>
+
+                        <div class="muted">
+                            Image Preview
+                        </div>
+
+                    </div>
+
+
+                    <div class="tools">
+
+                        <button
+                            class="secondary"
+                            onclick="showManager()"
+                        >
+                            Back
+                        </button>
+
+
+                        <button
+                            class="primary"
+                            onclick="downloadFile('${escapeHTML(path)}')"
+                        >
+                            Download
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    style="
+                        width:100%;
+                        min-height:500px;
+                        height:calc(100vh - 190px);
+                        background:#f1f2f5;
+                        border-radius:16px;
+                        display:flex;
+                        justify-content:center;
+                        align-items:center;
+                        overflow:auto;
+                        padding:20px;
+                        box-sizing:border-box;
+                    "
+                >
+
+                    <img
+                        src="${imageURL}"
+                        alt="${escapeHTML(fileName)}"
+                        style="
+                            max-width:100%;
+                            max-height:100%;
+                            object-fit:contain;
+                            border-radius:8px;
+                        "
+                    >
+
+                </div>
+
+
+            </main>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   DOWNLOAD FILE
+   ========================================================= */
+
+function downloadFile(path) {
+
+    const url =
+        getRawFileURL(path);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+    link.target = "_blank";
+
+    link.rel =
+        "noopener noreferrer";
+
+
+    link.download =
+        path.split("/").pop();
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+function filterFiles() {
+
+    drawFiles(
+        currentItems
+    );
+
+}
+
+
+/* =========================================================
+   BREADCRUMB
+   ========================================================= */
+
+function drawBreadcrumb() {
+
+    const breadcrumb =
+        document.getElementById(
+            "breadcrumb"
+        );
+
+
+    if (!breadcrumb) {
+
+        return;
+
+    }
+
+
+    breadcrumb.innerHTML = "";
+
+
+    const home =
+        document.createElement(
+            "span"
+        );
+
+
+    home.textContent =
+        "Home";
+
+
+    home.onclick =
+        function () {
+
+            currentPath =
+                GITHUB_PATH;
+
+
+            const search =
+                document.getElementById(
+                    "search"
+                );
+
+
+            if (search) {
+
+                search.value = "";
+
+            }
+
+
+            loadFolder();
+
+        };
+
+
+    breadcrumb.appendChild(
+        home
+    );
+
+
+    const baseParts =
+        GITHUB_PATH
+            .split("/")
+            .filter(Boolean);
+
+
+    const currentParts =
+        currentPath
+            .split("/")
+            .filter(Boolean);
+
+
+    const remainingParts =
+        currentParts.slice(
+            baseParts.length
+        );
+
+
+    let builtPath =
+        GITHUB_PATH;
+
+
+    remainingParts.forEach(
+        function (folder) {
+
+
+            const separator =
+                document.createElement(
+                    "b"
+                );
+
+
+            separator.textContent =
+                "/";
+
+
+            breadcrumb.appendChild(
+                separator
+            );
+
+
+            builtPath +=
+                "/" + folder;
+
+
+            const folderLink =
+                document.createElement(
+                    "span"
+                );
+
+
+            folderLink.textContent =
+                folder;
+
+
+            const selectedPath =
+                builtPath;
+
+
+            folderLink.onclick =
+                function () {
+
+                    currentPath =
+                        selectedPath;
+
+
+                    const search =
+                        document.getElementById(
+                            "search"
+                        );
+
+
+                    if (search) {
+
+                        search.value = "";
+
+                    }
+
+
+                    loadFolder();
+
+                };
+
+
+            breadcrumb.appendChild(
+                folderLink
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   START APPLICATION
+   ========================================================= */
+
+if (role) {
+
+    showManager();
+
+}
+else {
+
+    showLogin();
+
+     }
