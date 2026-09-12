@@ -16,8 +16,8 @@
   The admin portal is intentionally read-only here. You manage folders/files
   directly in GitHub; after a commit, the website reads the new structure.
 */
-const GITHUB_OWNER="YOUR_GITHUB_USERNAME";
-const GITHUB_REPO="YOUR_REPOSITORY";
+const GITHUB_OWNER="siddhucreation";
+const GITHUB_REPO="Notes";
 const GITHUB_PATH="documents";
 const BRANCH="main";
 
