@@ -4,7 +4,7 @@ const GITHUB_PATH="documents";
 const BRANCH="main";
 
 const ACCOUNTS={
-  user:{password:"bca",role:"bca"},
+  user:{password:"user",role:"user123"},
   admin:{password:"admin123",role:"admin"}
 };
 
